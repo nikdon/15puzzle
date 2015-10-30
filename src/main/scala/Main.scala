@@ -16,7 +16,9 @@ object Game {
   case object Left extends Move
   case object Right extends Move
 
-  class Game(emptyField: Pos, gameBoard: Board)
+  class Game(emptyField: Pos, gameBoard: Board) {
+    def show(): String = ???
+  }
 }
 
 
@@ -34,7 +36,29 @@ object Main {
 
   def greetings(): IO[Unit] = ???
 
-  def gameLoop(): IO[Unit] = ???
+  def showResults(game: Game): IO[Unit] = for {
+    _ <- showGame(game)
+    _ <- putStrLn("Gave over")
+  } yield ()
+
+  def showGame(game: Game): IO[Unit] = putStrLn(game.show())
+
+  def gameLoop(game: Game): IO[Unit] = {
+    if (isGameOver(game)) for {
+      _ <- showResults(game)
+      game <- setup()
+    } yield gameLoop(game)
+    else for {
+      _ <- showGame(game)
+      move <- askForMove()
+    } yield reactOnMove(game, move)
+  }
+
+  def askForMove(): IO[Query] = ???
+
+  def reactOnMove(game: Game, query: Query): IO[Unit] = ???
+
+  def isGameOver(game: Game): Boolean = ???
 
   def setup(): IO[Game] = for {
     _ <- putStrLn("Start new game?")
