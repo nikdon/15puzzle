@@ -36,8 +36,8 @@ object Game {
   def to2D(idx: Int): Pos = ???
 
   val initGame: Game = {
-    val empty: Pos = (3, 3)
-    val board: Board = Vector.tabulate(16)(lbl => lbl)
+    val empty: Pos = to2D(WIDTH * WIDTH)
+    val board: Board = Vector.tabulate(WIDTH*WIDTH)(lbl => lbl)
     new Game(empty, board)
   }
   
@@ -57,7 +57,7 @@ object Game {
     }
 
     def within(pos: Pos): Boolean = {
-      val check = (p: Int) => p >= 0 && p <= 3
+      val check = (p: Int) => p >= 0 && p <= (WIDTH - 1)
       val (a, b) = pos
       check(a) && check(b)
     }
