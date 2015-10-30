@@ -56,7 +56,15 @@ object Main {
 
   def askForMove(): IO[Query] = ???
 
-  def reactOnMove(game: Game, query: Query): IO[Unit] = ???
+  def quit(): IO[Unit] = putStrLn("See again, stranger!")
+
+  def move(m: Query): Game = ???
+
+  def reactOnMove(game: Game, query: Query): IO[Unit] = query match {
+    case Quit        => quit()
+    case n: NewGame  => shuffle(n.difficulty) flatMap gameLoop
+    case m: PlayMove => gameLoop(move(m))
+  }
 
   def isGameOver(game: Game): Boolean = ???
 
