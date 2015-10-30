@@ -74,7 +74,7 @@ object Main {
     move <- parseQuery(in).fold(wrongMove().flatMap(_ => askAgain()))(q => IO(q))
   } yield move
 
-  def quit(): IO[Unit] = putStrLn("See again, stranger!")
+  def quit(): IO[Unit] = putStrLn("See you again, stranger!")
 
   def move(m: Query): Game = ???
 
