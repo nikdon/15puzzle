@@ -1,5 +1,6 @@
 
 import scala.util.Try
+import scalaz.Scalaz._
 import scalaz.effect.IO
 import scalaz.effect.IO._
 
@@ -28,8 +29,8 @@ object Main {
 
   trait Query
   case object Quit extends Query
-  case class NewGame(difficulty: Int)
-  case class PlayMove(move: Move)
+  case class NewGame(difficulty: Int) extends Query
+  case class Play(m: Move) extends Query
 
 
   def play(): IO[Unit] = for {
@@ -56,7 +57,23 @@ object Main {
     } yield reactOnMove(game, move)
   }
 
-  def parseQuery(in: String): Option[Query] = ???
+  def parseQuery(input: String): Option[Query] = input match {
+    case "up"    => Play(Up).some
+    case "u"     => Play(Up).some
+    case "down"  => Play(Down).some
+    case "d"     => Play(Down).some
+    case "left"  => Play(Left).some
+    case "l"     => Play(Left).some
+    case "right" => Play(Right).some
+    case "r"     => Play(Right).some
+    case "quit"  => Quit.some
+    case "q"     => Quit.some
+
+    case str if str.startsWith("new") =>
+      str.split(" ").tail.headOption
+        .flatMap(n => readInt(n))
+        .map(NewGame)
+  }
 
   def showAsk(): IO[Unit] = ???
 
@@ -76,12 +93,12 @@ object Main {
 
   def quit(): IO[Unit] = putStrLn("See you again, stranger!")
 
-  def move(m: Query): Game = ???
+  def doMove(m: Move, g: Game): Game = ???
 
   def reactOnMove(game: Game, query: Query): IO[Unit] = query match {
-    case Quit        => quit()
-    case n: NewGame  => shuffle(n.difficulty) flatMap gameLoop
-    case m: PlayMove => gameLoop(move(m))
+    case Quit                  => quit()
+    case g@NewGame(difficulty) => shuffle(difficulty) flatMap gameLoop
+    case p@Play(move)          => gameLoop(doMove(move, game))
   }
 
   def isGameOver(game: Game): Boolean = ???
