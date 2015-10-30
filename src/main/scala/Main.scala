@@ -77,7 +77,21 @@ object Main {
 
   def showAsk(): IO[Unit] = ???
 
-  def remindMoves(): IO[Unit] = ???
+  def remindMoves(): IO[Unit] = {
+    val reminder =
+      """Possible moves of the empty cell:
+        | left  or l  -- move on the left
+        | right or r  -- move on the right
+        | up    or u  -- move up
+        | down  ot d  -- move down
+        |
+        | Other actions:
+        |   new [Int] -- start new game with difficulty [Int]
+        |   quit or q -- quit the game
+      """.stripMargin
+
+    putStrLn(reminder)
+  }
 
   def wrongMove(): IO[Unit] = for {
     _ <- putStrLn("Can't recognize move.")
