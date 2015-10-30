@@ -26,10 +26,11 @@ object Game {
 
 
   val EMPTY_LABEL = 15
+  val WIDTH = 4
 
   def to1D(pos: Pos): Int = {
     val (x, y) = pos
-    4 * x + y // Board is 4 by 4
+    WIDTH * x + y
   }
 
   def to2D(idx: Int): Pos = ???
