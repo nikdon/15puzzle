@@ -41,8 +41,7 @@ object Main {
 
   def showResults(game: Game): IO[Unit] = for {
     _ <- showGame(game)
-    _ <- putStrLn("Gave over")
-  } yield ()
+  } yield putStrLn("Gave over")
 
   def showGame(game: Game): IO[Unit] = putStrLn(game.show())
 
@@ -65,8 +64,7 @@ object Main {
 
   def wrongMove(): IO[Unit] = for {
     _ <- putStrLn("Can't recognize move.")
-    _ <- remindMoves()
-  } yield ()
+  } yield remindMoves()
 
   def askAgain(): IO[Query] = ???
 
