@@ -8,7 +8,9 @@ import scalaz.effect.IO._
 object Game {
   type Pos = (Int, Int)
   type Label = Int
-  type Board = List[(Pos, Label)]
+  type Board = (Vector[Label])
+  type Vec = (Int, Int)
+
 
   trait Move
 
@@ -17,9 +19,68 @@ object Game {
   case object Left extends Move
   case object Right extends Move
 
-  class Game(emptyField: Pos, gameBoard: Board) {
+
+  class Game(val emptyField: Pos, val gameBoard: Board) {
     def show(): String = ???
   }
+
+
+  val EMPTY_LABEL = 15
+
+  def to1D(pos: Pos): Int = {
+    val (x, y) = pos
+    4 * x + y // Board is 4 by 4
+  }
+
+  def to2D(idx: Int): Pos = ???
+
+  val initGame: Game = {
+    val empty: Pos = (3, 3)
+    val board: Board = Vector.tabulate(16)(lbl => lbl)
+    new Game(empty, board)
+  }
+  
+  def doMove(m: Move, g: Game): Game = {
+
+    def orient(move: Move): Vec = move match {
+      case Up    => (-1, 0)
+      case Down  => (1, 0)
+      case Left  => (0, -1)
+      case Right => (0, 1)
+    }
+
+    def shift(vec: Vec, pos: Pos): Pos = {
+      val (va, vb) = vec
+      val (pa, pb) = pos
+      (va + pa, vb + pb)
+    }
+
+    def within(pos: Pos): Boolean = {
+      val check = (p: Int) => p >= 0 && p <= 3
+      val (a, b) = pos
+      check(a) && check(b)
+    }
+
+    val currEmpPos = g.emptyField
+    val nextEmpPos = shift(orient(m), currEmpPos)
+
+    if (within(nextEmpPos)) {
+      val currBoard = g.gameBoard
+      val nextBoard = currBoard
+        .updated(to1D(currEmpPos), currBoard(to1D(nextEmpPos)))
+        .updated(to1D(nextEmpPos), EMPTY_LABEL)
+      
+      new Game(nextEmpPos, nextBoard)
+    } else g
+  }
+
+  def shuffle(diff: Int): IO[Game] = {
+    val nextStage = initGame.gameBoard.permutations.drop(diff).next()
+    val emptyIdx = nextStage.indexOf(EMPTY_LABEL)
+    new Game(to2D(emptyIdx), nextStage).point[IO]
+  }
+
+  def isGameOver(game: Game): Boolean = game == initGame
 }
 
 
@@ -38,7 +99,22 @@ object Main {
     game <- setup()
   } yield gameLoop(game)
 
-  def greetings(): IO[Unit] = ???
+  def greetings(): IO[Unit] = {
+    val greet =
+      """●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
+        |░░░▒▒▒▒▒▓▓▓▒▒▒▒▒░░░
+        |░╔╦╦╦═╦╗╔═╦═╦══╦═╗░
+        |░║║║║╩╣╚╣═╣║║║║║╩╣░
+        |░╚══╩═╩═╩═╩═╩╩╩╩═╝░
+        |░░░▒▒▒▒▒▓▓▓▒▒▒▒▒░░░
+        |●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
+        """.stripMargin
+
+    for {
+      _ <- putStrLn(greet)
+      _ <- putStrLn(initGame.show())
+    } yield remindMoves()
+  }
 
   def showResults(game: Game): IO[Unit] = for {
     _ <- showGame(game)
@@ -75,7 +151,7 @@ object Main {
         .map(NewGame)
   }
 
-  def showAsk(): IO[Unit] = ???
+  def showAsk(): IO[Unit] = putStrLn("Your move: ")
 
   def remindMoves(): IO[Unit] = {
     val reminder =
@@ -107,15 +183,11 @@ object Main {
 
   def quit(): IO[Unit] = putStrLn("See you again, stranger!")
 
-  def doMove(m: Move, g: Game): Game = ???
-
   def reactOnMove(game: Game, query: Query): IO[Unit] = query match {
     case Quit                  => quit()
     case g@NewGame(difficulty) => shuffle(difficulty) flatMap gameLoop
     case p@Play(move)          => gameLoop(doMove(move, game))
   }
-
-  def isGameOver(game: Game): Boolean = ???
 
   def setup(): IO[Game] = for {
     _ <- putStrLn("Start new game?")
@@ -125,5 +197,4 @@ object Main {
   } yield game
 
   def readInt(str: String): Option[Int] = Try(str.toInt).toOption
-  def shuffle(diff: Int): IO[Game] = ???
 }
