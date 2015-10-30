@@ -32,7 +32,10 @@ object Main {
   case class PlayMove(move: Move)
 
 
-  def play(): IO[Unit] = ???
+  def play(): IO[Unit] = for {
+    _ <- greetings()
+    game <- setup()
+  } yield gameLoop(game)
 
   def greetings(): IO[Unit] = ???
 
@@ -54,7 +57,24 @@ object Main {
     } yield reactOnMove(game, move)
   }
 
-  def askForMove(): IO[Query] = ???
+  def parseQuery(in: String): Option[Query] = ???
+
+  def showAsk(): IO[Unit] = ???
+
+  def remindMoves(): IO[Unit] = ???
+
+  def wrongMove(): IO[Unit] = for {
+    _ <- putStrLn("Can't recognize move.")
+    _ <- remindMoves()
+  } yield ()
+
+  def askAgain(): IO[Query] = ???
+
+  def askForMove(): IO[Query] = for {
+    _ <- showAsk()
+    in <- readLn
+    move <- parseQuery(in).fold(wrongMove().flatMap(_ => askAgain()))(q => IO(q))
+  } yield move
 
   def quit(): IO[Unit] = putStrLn("See again, stranger!")
 
