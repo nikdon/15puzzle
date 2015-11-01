@@ -33,7 +33,11 @@ object Game {
     WIDTH * x + y
   }
 
-  def to2D(idx: Int): Pos = ???
+  def to2D(idx: Int): Pos = {
+    val x = idx / WIDTH
+    val y = idx % WIDTH
+    (x, y)
+  }
 
   val initGame: Game = {
     val empty: Pos = to2D(WIDTH * WIDTH)
@@ -174,7 +178,11 @@ object Main {
     _ <- putStrLn("Can't recognize move.")
   } yield remindMoves()
 
-  def askAgain(): IO[Query] = ???
+  def askAgain(): IO[Query] = for {
+    _ <- remindMoves()
+    _ <- showAsk()
+    move <- askForMove()
+  } yield move
 
   def askForMove(): IO[Query] = for {
     _ <- showAsk()
