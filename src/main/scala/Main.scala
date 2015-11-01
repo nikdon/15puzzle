@@ -159,7 +159,7 @@ object Main extends App {
         .flatMap(n => readInt(n))
         .map(NewGame)
 
-    case _ => None
+    case _ => none
   }
 
   def showAsk(): IO[Unit] = putStrLn("Your move: ")
