@@ -21,7 +21,9 @@ object Game {
 
 
   class Game(val emptyField: Pos, val gameBoard: Board) {
-    def show(): String = ???
+    def show(): String = {
+      gameBoard.grouped(WIDTH).foldLeft("")((acc, row) => acc + row.mkString("\t") + "\n")
+    }
   }
 
 
@@ -80,7 +82,7 @@ object Game {
   }
 
   def shuffle(diff: Int): IO[Game] = {
-    val nextStage = initGame.gameBoard.permutations.drop(diff).next()
+    val nextStage = initGame.gameBoard.permutations.drop(42).next()
     val emptyIdx = nextStage.indexOf(EMPTY_LABEL)
     new Game(to2D(emptyIdx), nextStage).point[IO]
   }
@@ -89,7 +91,7 @@ object Game {
 }
 
 
-object Main {
+object Main extends App {
   import Game._
 
 
@@ -102,17 +104,18 @@ object Main {
   def play(): IO[Unit] = for {
     _ <- greetings()
     game <- setup()
-  } yield gameLoop(game)
+    _ <- gameLoop(game)
+  } yield ()
 
   def greetings(): IO[Unit] = {
     val greet =
-      """●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
+      """  ●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
         |░░░▒▒▒▒▒▓▓▓▒▒▒▒▒░░░
         |░╔╦╦╦═╦╗╔═╦═╦══╦═╗░
         |░║║║║╩╣╚╣═╣║║║║║╩╣░
         |░╚══╩═╩═╩═╩═╩╩╩╩═╝░
         |░░░▒▒▒▒▒▓▓▓▒▒▒▒▒░░░
-        |●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
+        |  ●▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬●
         """.stripMargin
 
     for {
@@ -131,11 +134,13 @@ object Main {
     if (isGameOver(game)) for {
       _ <- showResults(game)
       game <- setup()
-    } yield gameLoop(game)
+      _ <- gameLoop(game)
+    } yield ()
     else for {
       _ <- showGame(game)
       move <- askForMove()
-    } yield reactOnMove(game, move)
+      _ <- reactOnMove(game, move)
+    } yield ()
   }
 
   def parseQuery(input: String): Option[Query] = input match {
@@ -154,6 +159,8 @@ object Main {
       str.split(" ").tail.headOption
         .flatMap(n => readInt(n))
         .map(NewGame)
+
+    case _ => None
   }
 
   def showAsk(): IO[Unit] = putStrLn("Your move: ")
@@ -176,11 +183,11 @@ object Main {
 
   def wrongMove(): IO[Unit] = for {
     _ <- putStrLn("Can't recognize move.")
-  } yield remindMoves()
+    _ <- remindMoves()
+  } yield ()
 
   def askAgain(): IO[Query] = for {
     _ <- remindMoves()
-    _ <- showAsk()
     move <- askForMove()
   } yield move
 
@@ -206,4 +213,7 @@ object Main {
   } yield game
 
   def readInt(str: String): Option[Int] = Try(str.toInt).toOption
+
+
+  play().unsafePerformIO()
 }
