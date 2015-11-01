@@ -1,4 +1,3 @@
-
 import scala.util.Try
 import scalaz.Scalaz._
 import scalaz.effect.IO
