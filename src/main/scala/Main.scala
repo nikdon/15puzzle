@@ -186,7 +186,6 @@ object Main extends App {
   } yield ()
 
   def askAgain(): IO[Query] = for {
-    _ <- remindMoves()
     move <- askForMove()
   } yield move
 
