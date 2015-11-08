@@ -21,7 +21,9 @@ object Game {
 
   class Game(val emptyField: Pos, val gameBoard: Board) {
     def show(): String = {
-      gameBoard.grouped(WIDTH).foldLeft("")((acc, row) => acc + row.mkString("\t") + "\n")
+      gameBoard.map(_ + 1).grouped(WIDTH).foldLeft("+---+---+---+---+\n")((acc, row) => {
+        acc + "|" + row.mkString("\t|") +"\t|" + "\n+---+---+---+---+\n"
+      }).replace("16", "  ")
     }
   }
 
